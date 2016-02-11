@@ -2,10 +2,24 @@
 <head>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io('http://sensor.dimitrioskouzisloukas.com:8080');
+  socket.on('measurement', function (data) {
+    //socket.emit('my other event', { my: 'data' });
+    $("#foobar").text(data);
+  });
+</script>
+
+
 
 </head>
 <body>
-Hello World
+
+<span id="foobar"></id>
 
 
 
