@@ -3,13 +3,52 @@
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<script src="sprintf.js"></script>
 
 <script>
 
 var socket = io('http://sensor.dimitrioskouzisloukas.com:8080');
 
+var radius = 0.;
+var theta = 0.;
+var phi = 0.;
+
 socket.on('measurement', function (data) {
-	$("#foobar").text(data);
+	var parts = data.split(" ");
+	
+	var x = parseFloat(parts[0]);
+	var y = parseFloat(parts[1]);
+	var z = parseFloat(parts[2]);
+	
+	var sqrd = (x*x)+(y*y)+(z*z);
+	
+    var dradius = Math.pow(sqrd,.5);
+    var dtheta = Math.acos(z/dradius);
+	var dphi = Math.atan2(y,x);
+	
+	var alpha = 0.75;
+	
+	radius  = alpha * radius + (1.-alpha) * dradius;
+	theta   = alpha * theta  + (1.-alpha) *  dtheta;
+	phi     = alpha * phi    + (1.-alpha) *    dphi;
+	
+	var t0 = 0.7;
+	var ts = 0.4;
+	
+	var cl = theta<    (t0 + 0 * ts) ? '1' : 
+				theta< (t0 + 1 * ts) ? '2' : 
+				theta< (t0 + 2 * ts) ? '3' : '4';
+	
+	var CLICK_THRESSHOLD = 1.5;
+	
+	color = 'white'
+	if (radius > CLICK_THRESSHOLD) {
+		color = 'red';
+	}
+
+	html = sprintf("<strong>%s</strong><br /><br />%03.2f %03.2f %03.2f", cl, radius, theta, phi);
+	$('#classifier').html(html);
+	$('#classifier').css('background-color', color);
 });
 
 $(function() {
@@ -31,9 +70,7 @@ $(function() {
 	
 <input type="text" id="textbox"></input>
 
-<span id="foobar"></id>	
-
-
+<div id="classifier" style="width:120; height:60;border: 1px solid green; padding-top:3px;"></div>
 
 </body>
 
